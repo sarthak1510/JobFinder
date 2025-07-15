@@ -1,0 +1,10 @@
+PyPDF2==3.0.1
+langchain==0.2.11
+langchain-openai
+openai
+pydantic==2.7.1
+python-dotenv
+fastapi
+uvicorn
+streamlit
+requests
