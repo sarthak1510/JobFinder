@@ -2,7 +2,8 @@ import streamlit as st
 import requests
 import json
 
-BACKEND_URL = "http://127.0.0.1:8000"
+"BACKEND_URL = "https://jobfinder-production-331e.up.railway.app"
+
 
 st.set_page_config(page_title="JobFinder", layout="centered")
 st.markdown("<h1 style='text-align: center; color: #000000;'>🔍 JobFinder</h1>", unsafe_allow_html=True)
