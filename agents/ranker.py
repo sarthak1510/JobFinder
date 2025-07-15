@@ -1,9 +1,10 @@
 import os
-from langchain.embeddings import OpenAIEmbeddings
-from langchain.vectorstores import FAISS
 from models.job_model import JobModel
 from typing import List
 import json
+from langchain_community.embeddings import OpenAIEmbeddings
+from langchain_community.vectorstores import FAISS
+
 
 class RankerAgent:
     def __init__(self, api_key: str = None):
