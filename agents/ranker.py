@@ -32,19 +32,30 @@ class RankerAgent:
         return valid
 
     def rank_jobs(self, resume: dict, raw_jobs: List[dict], k=5) -> List[JobModel]:
-        valid_jobs = self.validate_jobs(raw_jobs)
-        job_texts = [self.clean_job_text(job.model_dump()) for job in valid_jobs]
+    print(" RankerAgent.rank_jobs()")
 
+    valid_jobs = self.validate_jobs(raw_jobs)
+    print(f"{len(valid_jobs)} jobs validated")
+
+    job_texts = [self.clean_job_text(job.model_dump()) for job in valid_jobs]
+    print(f"Created {len(job_texts)} job texts for FAISS")
+
+    try:
         index = FAISS.from_texts(job_texts, embedding=self.embeddings)
+        print(" FAISS index created")
+    except Exception as e:
+        print("FAISS init failed:", e)
+        raise
 
-        query = ", ".join(resume["skills"]) + ", " + ", ".join(resume["job_preferences"]["roles"])
+    query = ", ".join(resume.get("skills", [])) + ", " + ", ".join(resume.get("job_preferences", {}).get("roles", []))
+    print("Query:", query)
+
+    try:
         results = index.similarity_search(query, k=k)
+        print(f"Found {len(results)} matching jobs")
+    except Exception as e:
+        print("Similarity search failed:", e)
+        raise
 
-        top_jobs = []
-        for result in results:
-            for job in valid_jobs:
-                if result.page_content.strip() == self.clean_job_text(job.model_dump()).strip():
-                    top_jobs.append(job)
-                    break
+    ...
 
-        return top_jobs
