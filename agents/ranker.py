@@ -1,7 +1,6 @@
 import os
 from models.job_model import JobModel
 from typing import List
-import json
 from langchain_community.embeddings import OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
 
@@ -32,30 +31,39 @@ class RankerAgent:
         return valid
 
     def rank_jobs(self, resume: dict, raw_jobs: List[dict], k=5) -> List[JobModel]:
-    print(" RankerAgent.rank_jobs()")
+        print("🔍 RankerAgent.rank_jobs()")
 
-    valid_jobs = self.validate_jobs(raw_jobs)
-    print(f"{len(valid_jobs)} jobs validated")
+        valid_jobs = self.validate_jobs(raw_jobs)
+        print(f"✅ {len(valid_jobs)} jobs validated")
 
-    job_texts = [self.clean_job_text(job.model_dump()) for job in valid_jobs]
-    print(f"Created {len(job_texts)} job texts for FAISS")
+        job_texts = [self.clean_job_text(job.model_dump()) for job in valid_jobs]
+        print(f"📝 Created {len(job_texts)} job texts for FAISS")
 
-    try:
-        index = FAISS.from_texts(job_texts, embedding=self.embeddings)
-        print(" FAISS index created")
-    except Exception as e:
-        print("FAISS init failed:", e)
-        raise
+        try:
+            index = FAISS.from_texts(job_texts, embedding=self.embeddings)
+            print("📦 FAISS index created")
+        except Exception as e:
+            print("❌ FAISS init failed:", e)
+            raise
 
-    query = ", ".join(resume.get("skills", [])) + ", " + ", ".join(resume.get("job_preferences", {}).get("roles", []))
-    print("Query:", query)
+        query = ", ".join(resume.get("skills", [])) + ", " + ", ".join(
+            resume.get("job_preferences", {}).get("roles", [])
+        )
+        print("🔎 Query:", query)
 
-    try:
-        results = index.similarity_search(query, k=k)
-        print(f"Found {len(results)} matching jobs")
-    except Exception as e:
-        print("Similarity search failed:", e)
-        raise
+        try:
+            results = index.similarity_search(query, k=k)
+            print(f"🎯 Found {len(results)} matching jobs")
+        except Exception as e:
+            print("❌ Similarity search failed:", e)
+            raise
 
-    ...
-
+        # Return the actual matching JobModel objects (based on the index)
+        top_jobs = []
+        for result in results:
+            for job in valid_jobs:
+                job_text = self.clean_job_text(job.model_dump())
+                if job_text == result.page_content:
+                    top_jobs.append(job)
+                    break
+        return top_jobs
