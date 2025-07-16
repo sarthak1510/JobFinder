@@ -2,7 +2,7 @@ import streamlit as st
 import requests
 import json
 
-"BACKEND_URL = "https://jobfinder-production-331e.up.railway.app"
+BACKEND_URL = "https://jobfinder-production-331e.up.railway.app"
 
 
 st.set_page_config(page_title="JobFinder", layout="centered")
