@@ -57,18 +57,29 @@ def search_jobs():
 
 @router.post("/rank-jobs")
 def rank_jobs():
-    with open("data/parsed_resume.json") as f:
-        resume = json.load(f)
+    try:
+        print(" /rank-jobs called")
 
-    with open("data/jobs.json") as f:
-        raw_jobs = json.load(f)
+        with open("data/parsed_resume.json") as f:
+            resume = json.load(f)
+        print(" Resume loaded with keys:", list(resume.keys()))
 
-    agent = RankerAgent()
-    top_jobs = agent.rank_jobs(resume, raw_jobs)
+        with open("data/jobs.json") as f:
+            raw_jobs = json.load(f)
+        print(f" Loaded {len(raw_jobs)} raw jobs")
 
-    ranked_jobs = [job.model_dump(mode="json") for job in top_jobs]
+        agent = RankerAgent()
+        top_jobs = agent.rank_jobs(resume, raw_jobs)
+        print(f"Ranked {len(top_jobs)} jobs")
 
-    with open("data/ranked_jobs.json", "w") as f:
-        json.dump(ranked_jobs, f, indent=2)
+        ranked_jobs = [job.model_dump(mode="json") for job in top_jobs]
 
-    return {"ranked_jobs": ranked_jobs}
+        with open("data/ranked_jobs.json", "w") as f:
+            json.dump(ranked_jobs, f, indent=2)
+
+        return {"ranked_jobs": ranked_jobs}
+
+    except Exception as e:
+        print(" ERROR in /rank-jobs:", str(e))
+        return {"error": str(e)}, 500
+
